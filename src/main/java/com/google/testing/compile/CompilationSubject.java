@@ -25,6 +25,7 @@ import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.Compilation.Status.FAILURE;
 import static com.google.testing.compile.Compilation.Status.SUCCESS;
 import static com.google.testing.compile.JavaFileObjectSubject.javaFileObjects;
+import static com.google.testing.compile.executable.compiledClass.CompiledClassSubject.compiledClasses;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.joining;
@@ -42,6 +43,10 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.common.truth.Truth;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.testing.compile.executable.compiledClass.CompiledClass;
+import com.google.testing.compile.executable.compiledClass.CompiledClassSubject;
+import com.google.testing.compile.executable.ClassLoaderForCompilation;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Optional;
@@ -321,6 +326,25 @@ public final class CompilationSubject extends Subject {
   public JavaFileObjectSubject generatedSourceFile(String qualifiedName) {
     return generatedFile(
         StandardLocation.SOURCE_OUTPUT, qualifiedName.replaceAll("\\.", "/") + ".java");
+  }
+
+  /**
+   * Asserts that compilation generated a given class
+   * */
+  @CanIgnoreReturnValue
+  public CompiledClassSubject compilesClassNamed(String fullyQualifiedName) {
+    ClassLoaderForCompilation classLoader = new ClassLoaderForCompilation(actual);
+
+    try {
+      Class clazz = classLoader.loadClass(fullyQualifiedName);
+      CompiledClass compiledClass = new CompiledClass(fullyQualifiedName, actual, clazz);
+      return assertAbout(compiledClasses()).that(compiledClass);
+    } catch (ClassNotFoundException e) {
+      failWithoutActual(
+              fact("expected class to exist", fullyQualifiedName),
+              fact("but the following classes exist", classLoader.getAllLoadedClassesAsDiagnosticString()));
+      return null;
+    }
   }
 
   private static final JavaFileObject ALREADY_FAILED =

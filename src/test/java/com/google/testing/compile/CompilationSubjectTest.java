@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.CompilationSubject.compilations;
 import static com.google.testing.compile.Compiler.javac;
+import static com.google.testing.compile.executable.compiledClass.CompiledClassSubject.compiledClasses;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.joining;
@@ -853,6 +854,41 @@ public class CompilationSubjectTest {
       AssertionError expected = expectFailure.getFailure();
       assertThat(expected).factValue("expected to generate file").isEqualTo("/File.java");
       assertThat(expected.getMessage()).contains(GeneratingProcessor.GENERATED_CLASS_NAME);
+    }
+  }
+
+  /**
+   * Tests that checking for compiled classes behaves correctly
+   * */
+  @RunWith(JUnit4.class)
+  public static class CompiledClassTest {
+
+    @Rule public final ExpectFailure expectFailure = new ExpectFailure();
+
+    @Test
+    public void compilesClassNamed() {
+      assertThat(compilerWithGenerator().compile(HELLO_WORLD_RESOURCE))
+              .compilesClassNamed(GeneratingProcessor.GENERATED_CLASS_NAME);
+
+      assertThat(compilerWithGenerator().compile(HELLO_WORLD_RESOURCE))
+              .compilesClassNamed("test.HelloWorld");
+    }
+
+    @Test
+    public void compilesClassNamed_fail() {
+      expectFailure
+              .whenTesting()
+              .about(compilations())
+              .that(compilerWithGenerator().compile(HELLO_WORLD_RESOURCE))
+              .compilesClassNamed("Bogus");
+
+      AssertionError expected = expectFailure.getFailure();
+      assertThat(expected)
+              .factValue("expected class to exist")
+              .isEqualTo("Bogus");
+      assertThat(expected)
+              .factValue("but the following classes exist")
+              .isEqualTo(GeneratingProcessor.GENERATED_CLASS_NAME + ", test.HelloWorld");
     }
   }
 

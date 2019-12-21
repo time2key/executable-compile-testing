@@ -40,6 +40,8 @@ import com.google.testing.compile.CompilationSubject.DiagnosticAtColumn;
 import com.google.testing.compile.CompilationSubject.DiagnosticInFile;
 import com.google.testing.compile.CompilationSubject.DiagnosticOnLine;
 import com.google.testing.compile.Parser.ParseResult;
+import com.google.testing.compile.executable.compiledClass.CompiledClassClause;
+import com.google.testing.compile.executable.compiledClass.CompiledClassSubject;
 import com.sun.source.tree.CompilationUnitTree;
 import java.io.File;
 import java.io.IOException;
@@ -535,6 +537,23 @@ public final class JavaSourcesSubject extends Subject
         public SuccessfulFileClause<T> withStringContents(Charset charset, String expectedString) {
           javaFileObjectSubject.contentsAsString(charset).isEqualTo(expectedString);
           return this;
+        }
+      };
+    }
+
+    @Override
+    @CanIgnoreReturnValue
+    public CompiledClassClause<T> compilesClassNamed(String fullyQualifiedName) {
+      final CompiledClassSubject compiledClassSubject =
+              check("compilation()")
+                      .about(compilations())
+                      .that(compilation)
+                      .compilesClassNamed(fullyQualifiedName);
+      return new CompiledClassClause<T>() {
+
+        @Override
+        public GeneratedPredicateClause<T> and() {
+          return GeneratedCompilationBuilder.this;
         }
       };
     }

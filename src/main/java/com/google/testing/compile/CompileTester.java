@@ -17,6 +17,7 @@ package com.google.testing.compile;
 
 import com.google.common.io.ByteSource;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.testing.compile.executable.compiledClass.CompiledClassClause;
 
 import java.nio.charset.Charset;
 
@@ -166,6 +167,12 @@ public interface CompileTester {
     @CanIgnoreReturnValue
     SuccessfulFileClause<T> generatesFileNamed(
         JavaFileManager.Location location, String packageName, String relativeName);
+
+    /**
+     * Checks that a class with the given fully qualified name was generated.
+     * */
+    @CanIgnoreReturnValue
+    CompiledClassClause compilesClassNamed(String fullyQualifiedName);
   }
 
   /**
