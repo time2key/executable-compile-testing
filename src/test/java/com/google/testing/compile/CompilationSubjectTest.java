@@ -61,6 +61,23 @@ public class CompilationSubjectTest {
           "  }",
           "}");
 
+  private static final JavaFileObject HELLO_WORLD_WITH_INNER_CLASS =
+          JavaFileObjects.forSourceLines(
+                  "test.HelloWorld",
+                  "package test;",
+                  "",
+                  "import " + DiagnosticMessage.class.getCanonicalName() + ";",
+                  "",
+                  "@DiagnosticMessage",
+                  "public class HelloWorld {",
+                  "  public class Inner {",
+                  "  }",
+                  "  @DiagnosticMessage Object foo;",
+                  "  void weird() {",
+                  "    foo.toString();",
+                  "  }",
+                  "}");
+
   private static final JavaFileObject HELLO_WORLD_BROKEN =
       JavaFileObjects.forSourceLines(
           "test.HelloWorld",
@@ -872,6 +889,18 @@ public class CompilationSubjectTest {
 
       assertThat(compilerWithGenerator().compile(HELLO_WORLD_RESOURCE))
               .compilesClassNamed("test.HelloWorld");
+    }
+
+    @Test
+    public void compilesClassNamed_innerClass() {
+      assertThat(compilerWithGenerator().compile(HELLO_WORLD_WITH_INNER_CLASS))
+              .compilesClassNamed(GeneratingProcessor.GENERATED_CLASS_NAME);
+
+      assertThat(compilerWithGenerator().compile(HELLO_WORLD_WITH_INNER_CLASS))
+              .compilesClassNamed("test.HelloWorld");
+
+      assertThat(compilerWithGenerator().compile(HELLO_WORLD_WITH_INNER_CLASS))
+              .compilesClassNamed("test.HelloWorld$Inner");
     }
 
     @Test
