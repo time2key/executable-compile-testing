@@ -42,6 +42,7 @@ import com.google.testing.compile.CompilationSubject.DiagnosticOnLine;
 import com.google.testing.compile.Parser.ParseResult;
 import com.google.testing.compile.executable.compiledClass.CompiledClassClause;
 import com.google.testing.compile.executable.compiledClass.CompiledClassSubject;
+import com.google.testing.compile.executable.instantiatedClass.InstantiatedClassClause;
 import com.sun.source.tree.CompilationUnitTree;
 import java.io.File;
 import java.io.IOException;
@@ -550,6 +551,11 @@ public final class JavaSourcesSubject extends Subject
                       .that(compilation)
                       .compilesClassNamed(fullyQualifiedName);
       return new CompiledClassClause<T>() {
+
+        @Override
+        public InstantiatedClassClause instantiate(Object... constructorArguments) {
+          return compiledClassSubject.instantiate(constructorArguments);
+        }
 
         @Override
         public GeneratedPredicateClause<T> and() {

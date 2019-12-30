@@ -1,6 +1,7 @@
 package com.google.testing.compile.executable.compiledClass;
 
 import com.google.testing.compile.CompileTester;
+import com.google.testing.compile.executable.instantiatedClass.InstantiatedClassClause;
 
 /**
  * Clause in the fluent API that allows checks on a compiled class.
@@ -13,5 +14,5 @@ public interface CompiledClassClause<T> extends CompileTester.ChainingClause<Com
     /**
      * Checks the results of instantiating with given arguments
      * */
-    //InstantiatedClassClause instantiatableWithArguments(Object... constructorArguments);
+    InstantiatedClassClause instantiate(Object... constructorArguments);
 }

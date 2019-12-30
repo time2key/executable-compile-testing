@@ -1,6 +1,11 @@
 package com.google.testing.compile.executable.compiledClass;
 
 import com.google.testing.compile.Compilation;
+import com.google.testing.compile.executable.ExecutionHelper;
+import com.google.testing.compile.executable.instantiatedClass.InstantiatedClass;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Represents a class compiled within a {@link Compilation}.
@@ -38,4 +43,14 @@ public class CompiledClass {
         return clazz;
     }
 
+    public InstantiatedClass instantiate(Object... constructorArguments) {
+        try {
+            Constructor<?> constructor = clazz.getConstructor(ExecutionHelper.getClassesForObjects(constructorArguments));
+            Object instance = constructor.newInstance(constructorArguments);
+            InstantiatedClass instantiatedClass = new InstantiatedClass(instance, this, constructorArguments);
+            return instantiatedClass;
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            return null;
+        }
+    }
 }
